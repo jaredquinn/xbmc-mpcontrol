@@ -97,13 +97,13 @@ class MPCPlayer( xbmc.Player ):
 			self.ready = False
 
 		# actions to apply in all modes
-		if action == self.SWAP: self.actionSWAP()
+		if action == self.SWAP: return self.actionSWAP()
 	
 		# actions to apply in Auto Mode
 		if self.currentMode != self.AUTO: return True
-		if action == self.RESUME: self.actionRESUME()
-		if action == self.PAUSE: self.actionPAUSE() 
-		if action == self.START: self.actionSTART()
+		if action == self.RESUME: return self.actionRESUME()
+		if action == self.PAUSE: return self.actionPAUSE() 
+		if action == self.START: return self.actionSTART()
 
 		xbmc.log("mpcControl: unknown action %d" % action, xbmc.LOGNOTICE)
 		return False
