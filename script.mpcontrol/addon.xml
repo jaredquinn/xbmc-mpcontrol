@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.mpcontrol"
+       name="MPControl"
+       version="0.1"
+       provider-name="jaredquinn">
+  <requires>
+    <import addon="xbmc.python" version="1.0"/>
+    <import addon="script.module.xbmcaddon" version="1.0.4"/>
+  </requires>
+  <extension point="xbmc.service" library="default.py" start="login|startup"></extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">MPD Integration</summary>\
+    <description lang="en">
+	TBC
+    </description>
+    <platform>all</platform>
+  </extension>
+</addon>
