@@ -2,8 +2,12 @@
 <settings>
     <category label="39100">
         <setting type="lsep" label="32801" />
-        <setting id="mpserver" type="string"  label="32802" default="localhost" />
-        <setting id="mpusername" type="string" label="32803" default="" />
-        <setting id="mppassword" type="string" label="32804" default="" />
+        <setting id="mpserver" type="text"  label="32802" default="localhost" />
+        <setting id="mpusername" type="text" label="32803" default="" />
+        <setting id="mppassword" type="text" label="32804" default="" />
+    </category>
+    <category label="39200">
+	<settings type="lsep" label="32901" />
+	<setting id="mpstopmethod" type="enum" label="32902" default="1" lvalues="30501|30502" />
     </category>
 </settings>
