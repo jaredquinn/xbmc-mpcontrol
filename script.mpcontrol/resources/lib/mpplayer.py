@@ -5,25 +5,17 @@ from threading import Timer
 
 class MPCPlayer( xbmc.Player ):
 
-	PAUSE = 10001
-	RESUME = 10002
-	START = 10003
-	SWAP = 10004
+	START = 10001
+	SWAP = 10001
+	PAUSE = 20001
+	RESUME = 20002
 
 	AUTO = 100
 	MANUAL = 101
 	MPC = 102
 	XBMC = 103
 
-	currentMode = None
-	currentAudio = None
-	lastXBMCVolume = 0
-	ready = False
-	failure = False
-	client = None
-
 	def __init__( self, *args, **kwargs ):
-		xbmc.Player.__init__(self)
 		self.ready = False
 		self.failure = False
 		self.client = None
@@ -34,6 +26,7 @@ class MPCPlayer( xbmc.Player ):
 		self.currentMode = self.AUTO
 		self.currentAudio = self.XBMC
 		self.lastXBMCVolume = int(xbmc.executehttpapi("GetVolume").strip('<li>'))
+		xbmc.Player.__init__(self)
 		xbmc.log( 'gui is %s' % self.use_gui, xbmc.LOGNOTICE )
 
 		if len(self.use_gui) == 2:
@@ -84,26 +77,27 @@ class MPCPlayer( xbmc.Player ):
 		self.status = None
 
 		if self.client == None or self.ready == False:
-			self.client = mpcinterface.MPDClient()
-			self.client.connect(self.host,int(self.port))
-			self.ready = True
-			xbmc.log("mpcControl: connected", xbmc.LOGNOTICE)
-		
-		try:
-			xbmc.sleep(200)
-			self.status = self.client.status()
-			xbmc.log("mpcControl: current state (pre event) is %s" % self.status['state'],  xbmc.LOGNOTICE)
-		except:
-			self.ready = False
+			try:
+				self.client = mpcinterface.MPDClient()
+				self.client.connect(self.host,int(self.port))
+				self.ready = True
+				xbmc.log("mpcControl: connected", xbmc.LOGNOTICE)
+			except:
+				xbmc.log("mpcControl: ERROR", xbmc.LOGNOTICE)
+				self.ready = False
+				return False
+
+		if self.client == None or self.ready == False: 
+			xbmc.log("mpcControl: bad stuff has happened", xbmc.LOGNOTICE)
+			return False
+
+		self.status = self.getCurrentStatus()
 
 		# actions to apply in all modes
 		if action == self.SWAP: return self.actionSWAP()
-	
-		# actions to apply in Auto Mode
-		if self.currentMode != self.AUTO: return True
-		if action == self.RESUME: return self.actionRESUME()
-		if action == self.PAUSE: return self.actionPAUSE() 
 		if action == self.START: return self.actionSTART()
+		if action == self.PAUSE: return self.actionPAUSE() 
+		if action == self.RESUME: return self.actionRESUME()
 
 		xbmc.log("mpcControl: unknown action %d" % action, xbmc.LOGNOTICE)
 		return False
@@ -135,15 +129,19 @@ class MPCPlayer( xbmc.Player ):
 		counter = 0
 		while ( not xbmc.abortRequested and self.isPlaying() and counter < 5 ):
 			xbmc.sleep( 1000 )
+		counter = 0
 		if self.isPlaying(): return
+		xbmc.log("mpcControl: we stopped", xbmc.LOGNOTICE )
 		self.startLocalMusic()
 		return True
 
 	def actionPAUSE(self):
+		xbmc.log("mpcControl: actionPAUSE", xbmc.LOGNOTICE )
 		self.stopLocalMusic()
 		return True
 	
 	def actionSTART(self):	
+		xbmc.log("mpcControl: actionSTART", xbmc.LOGNOTICE )
 		if int(self.status['playlistlength']) > 0:
 			self.startLocalMusic()
 			return True
@@ -151,21 +149,19 @@ class MPCPlayer( xbmc.Player ):
 			xbmc.executebuiltin("XBMC.Notification(%s,%s,5000)" % ( 'Music Server', 'Playlist is Empty' ))
 			return False
 
-
-
-	def done(self):
-		xbmc.log("done", xbmc.LOGNOTICE)
-
-
 	def stopLocalMusic(self):
-		self.client.pause()
-		self.currentMode = self.XBMC
+		xbmc.log("mpcControl: requesting stop...", xbmc.LOGNOTICE )
+		self.currentAudio = self.XBMC
+		x = self.client.pause(1)
+		xbmc.log("mpcControl: result of request was %s" %x, xbmc.LOGNOTICE )
 		return True
 
 	def startLocalMusic(self):
+		xbmc.log("mpcControl: requesting start...", xbmc.LOGNOTICE )
+		self.currentAudio = self.MPC
 		xbmc.executebuiltin("XBMC.Notification(%s,%s,5000)" % ('Music Server', 'Resumiing Playlist'))
-		self.currentMode = self.MPC
-		self.client.play()
+		x = self.client.pause(0)
+		xbmc.log("mpcControl: result of request was %s" %x, xbmc.LOGNOTICE )
 		return True
 
 	def setXBMCVolume(self, newVolume):
@@ -173,6 +169,16 @@ class MPCPlayer( xbmc.Player ):
 		if(volume > 0): self.lastXBMCVolume = volume
 		xbmc.executehttpapi("SetVolume(%d)" % newVolume)
 		return volume
+
+	def getCurrentStatus(self):
+		try:
+			xbmc.sleep(200)
+			status = self.client.status()
+			xbmc.log("mpcControl: %s" % status,  xbmc.LOGNOTICE)
+			return status
+		except:
+			self.ready = False
+			return None
 
 
 xbmc.log("mpcControl: running in %s" % __name__, xbmc.LOGNOTICE)
