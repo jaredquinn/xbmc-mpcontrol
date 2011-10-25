@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="39100">
+        <setting type="lsep" label="32801" />
+        <setting id="mpserver" type="string"  label="32802" default="localhost" />
+        <setting id="mpusername" type="string" label="32803" default="" />
+        <setting id="mppassword" type="string" label="32804" default="" />
+    </category>
+</settings>
