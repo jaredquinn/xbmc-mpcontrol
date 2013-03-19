@@ -1,0 +1,10 @@
+XBMC <-> mpd interface
+
+Pause mpd playback prior to launching XBMC playback and then resume upon completion
+of XBMC playback.
+
+Allows mpd to be used for streaming or music library playback while XBMC screensaver
+is running and full sound from the XBMC media center when requested. 
+
+Note: This has not been updated for the v6 API (XBMC 12.0 Frodo).  It is compatible
+with API v4 and the HTTP Interface.
